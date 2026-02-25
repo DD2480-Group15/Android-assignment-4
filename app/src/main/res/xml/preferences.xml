@@ -112,6 +112,16 @@
     </PreferenceCategory>
 
     <PreferenceCategory
+        android:title="@string/settings_category_title_cards_creation"
+        app:iconSpaceReserved="false">
+
+        <DropDownPreference
+            android:key="@string/settings_key_default_currency"
+            android:title="@string/settings_default_currency"
+            android:defaultValue="@string/points"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory
         android:title="@string/settings_category_title_privacy"
         app:iconSpaceReserved="false">
 
