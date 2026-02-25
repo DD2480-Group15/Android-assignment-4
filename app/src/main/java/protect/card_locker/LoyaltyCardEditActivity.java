@@ -92,6 +92,7 @@ import protect.card_locker.async.TaskHandler;
 import protect.card_locker.databinding.LayoutChipChoiceBinding;
 import protect.card_locker.databinding.LoyaltyCardEditActivityBinding;
 import protect.card_locker.viewmodels.LoyaltyCardEditActivityViewModel;
+import protect.card_locker.preferences.Settings;
 
 public class LoyaltyCardEditActivity extends CatimaAppCompatActivity implements BarcodeImageWriterResultCallback, ColorPickerDialogListener {
     private static final String TAG = "Catima";
@@ -1014,7 +1015,11 @@ public class LoyaltyCardEditActivity extends CatimaAppCompatActivity implements 
 
     private void formatBalanceCurrencyField(Currency balanceType) {
         if (balanceType == null) {
-            balanceCurrencyField.setText(getString(R.string.points));
+            var currency = new Settings(this).getPreferredCurrency();
+            if(currency == null) 
+                balanceCurrencyField.setText(getCurrencySymbol(R.string.points));
+            else 
+                balanceCurrencyField.setText(getCurrencySymbol(currency));
         } else {
             balanceCurrencyField.setText(getCurrencySymbol(balanceType));
         }
