@@ -1017,7 +1017,7 @@ public class LoyaltyCardEditActivity extends CatimaAppCompatActivity implements 
         if (balanceType == null) {
             var currency = new Settings(this).getPreferredCurrency();
             if(currency == null) 
-                balanceCurrencyField.setText(getCurrencySymbol(R.string.points));
+                balanceCurrencyField.setText(getString(R.string.points));
             else 
                 balanceCurrencyField.setText(getCurrencySymbol(currency));
         } else {
