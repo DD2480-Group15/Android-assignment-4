@@ -97,11 +97,12 @@ class SettingsActivity : CatimaAppCompatActivity() {
                     .sorted()
 
                 //add POINTS and none options
-                symbols.toMutableList().add(0, "POINTS")
-                symbols.toMutableList().add(0, "NONE")
+                val mutableSymbols = symbols.toMutableList()
+                mutableSymbols.add(0, "POINTS")
+                mutableSymbols.add(0, "NONE")
 
-                pref.entries = symbols.toTypedArray() //displayed
-                pref.entryValues = symbols.toTypedArray() // saved under the key
+                pref.entries = mutableSymbols.toTypedArray() //displayed
+                pref.entryValues = mutableSymbols.toTypedArray() // saved under the key
 
                 // show current selection as summary
                 pref.summary = pref.value ?: ""
