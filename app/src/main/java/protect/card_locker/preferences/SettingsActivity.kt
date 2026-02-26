@@ -98,8 +98,7 @@ class SettingsActivity : CatimaAppCompatActivity() {
 
                 //add POINTS and none options
                 val mutableSymbols = symbols.toMutableList()
-                mutableSymbols.add(0, "POINTS")
-                mutableSymbols.add(0, "NONE")
+                mutableSymbols.add(0, getString(R.string.points))
 
                 pref.entries = mutableSymbols.toTypedArray() //displayed
                 pref.entryValues = mutableSymbols.toTypedArray() // saved under the key
