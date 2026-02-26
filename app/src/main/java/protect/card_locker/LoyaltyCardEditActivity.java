@@ -145,6 +145,7 @@ public class LoyaltyCardEditActivity extends CatimaAppCompatActivity implements 
     Toolbar toolbar;
 
     SQLiteDatabase mDatabase;
+    Settings settings;
 
     String tempStoredOldBarcodeValue = null;
     boolean initDone = false;
@@ -321,8 +322,11 @@ public class LoyaltyCardEditActivity extends CatimaAppCompatActivity implements 
         enableToolbarBackButton();
 
         mDatabase = new DBHelper(this).getWritableDatabase();
-
+        if (settings == null) { settings = new Settings(this); }
         if (!viewModel.getInitialized()) {
+            var pref_currency = settings.getPreferredCurrency();
+            if(pref_currency != null)
+                setLoyaltyCardBalanceType(pref_currency);
             if (!extractIntentFields(getIntent())) {
                 return;
             }
@@ -1015,11 +1019,7 @@ public class LoyaltyCardEditActivity extends CatimaAppCompatActivity implements 
 
     private void formatBalanceCurrencyField(Currency balanceType) {
         if (balanceType == null) {
-            var currency = new Settings(this).getPreferredCurrency();
-            if(currency == null) 
-                balanceCurrencyField.setText(getString(R.string.points));
-            else 
-                balanceCurrencyField.setText(getCurrencySymbol(currency));
+            balanceCurrencyField.setText(getString(R.string.points));
         } else {
             balanceCurrencyField.setText(getCurrencySymbol(balanceType));
         }
