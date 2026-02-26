@@ -288,7 +288,7 @@
     <string name="settings_column_count_portrait">Columns in portrait mode</string>
     <string name="settings_column_count_landscape">Columns in landscape mode</string>
     <string name="settings_default_currency">Default currency type</string>
-    <string name="settings_key_default_currency">Prefer currency</string>
+    <string name="settings_key_default_currency">Preferred currency</string>
     <string name="settings_automatic_column_count">Automatic</string>
     <string name="settings_key_automatic_column_count" translatable="false">default</string>
     <string name="settings_column_count_1">1</string>
