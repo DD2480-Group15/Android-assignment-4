@@ -110,7 +110,7 @@ public class Settings {
     public Currency getPreferredCurrency() {
         //default default is POINT
         String stored = getString(R.string.settings_key_default_currency, "POINTS");
-        String points = getString(R.string.points);
+        String points = getResString(R.string.points);
 
         if (points.equals(stored)) {
             return null; 
