@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
 import androidx.preference.ListPreference
 import androidx.preference.Preference
+import androidx.preference.DropDownPreference
 import androidx.preference.PreferenceFragmentCompat
 import protect.card_locker.BuildConfig
 import protect.card_locker.CatimaAppCompatActivity
@@ -84,6 +85,32 @@ class SettingsActivity : CatimaAppCompatActivity() {
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             // Load the preferences from an XML resource
             addPreferencesFromResource(R.xml.preferences)
+
+            //currency preference
+            val currencyPref = findPreference<DropDownPreference>(getString(R.string.settings_key_default_currency))
+
+            currencyPref?.let { pref ->
+                // Show symbols only
+                val symbols = java.util.Currency.getAvailableCurrencies()
+                    .map { it.symbol }  
+                    .distinct()
+                    .sorted()
+
+                //add POINTS and none options
+                val mutableSymbols = symbols.toMutableList()
+                mutableSymbols.add(0, getString(R.string.points))
+
+                pref.entries = mutableSymbols.toTypedArray() //displayed
+                pref.entryValues = mutableSymbols.toTypedArray() // saved under the key
+
+                // show current selection as summary
+                pref.summary = pref.value ?: ""
+                // update summary immediately when user picks one
+                pref.onPreferenceChangeListener = Preference.OnPreferenceChangeListener { p, newValue ->
+                    p.summary = newValue as String
+                    true // returning true = allow saving
+                }
+            }
 
             // Show pretty names and summaries
             val themePreference = findPreference<ListPreference>(getString(R.string.settings_key_theme))
