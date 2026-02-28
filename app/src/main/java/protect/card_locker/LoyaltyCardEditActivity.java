@@ -324,9 +324,10 @@ public class LoyaltyCardEditActivity extends CatimaAppCompatActivity implements 
         mDatabase = new DBHelper(this).getWritableDatabase();
         if (settings == null) { settings = new Settings(this); }
         if (!viewModel.getInitialized()) {
-            var pref_currency = settings.getPreferredCurrency();
-            if(pref_currency != null)
-                setLoyaltyCardBalanceType(pref_currency);
+            var prefCurrency = settings.getPreferredCurrency();
+            if(prefCurrency != null) {
+                setLoyaltyCardBalanceType(prefCurrency);
+            }
             if (!extractIntentFields(getIntent())) {
                 return;
             }
