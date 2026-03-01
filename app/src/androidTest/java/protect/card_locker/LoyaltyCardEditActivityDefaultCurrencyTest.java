@@ -6,18 +6,22 @@ import androidx.preference.PreferenceManager;
 import androidx.test.core.app.ActivityScenario;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.rule.GrantPermissionRule;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.Rule;
 
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
+import static androidx.test.espresso.matcher.ViewMatchers.withClassName;
+import static androidx.test.espresso.action.ViewActions.closeSoftKeyboard;
 import static androidx.test.espresso.action.ViewActions.click;
 import static androidx.test.espresso.action.ViewActions.replaceText;
 import static androidx.test.espresso.action.ViewActions.typeText;
-import static androidx.test.espresso.matcher.ViewMatchers.withClassName;
+
 
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.endsWith;
@@ -25,11 +29,15 @@ import static org.hamcrest.Matchers.endsWith;
 @RunWith(AndroidJUnit4.class)
 public class LoyaltyCardEditActivityDefaultCurrencyTest {
 
+    @Rule
+    public GrantPermissionRule permissionRule = GrantPermissionRule.grant(android.Manifest.permission.CAMERA);
+
     @Test
     public void defaultCurrencyPreselected() {
         Context context = ApplicationProvider.getApplicationContext();
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        prefs.edit().putString("pref_currency", "$").commit();
+        String key = context.getString(R.string.settings_key_default_currency);
+        prefs.edit().putString(key, "USD").commit();
 
         try (ActivityScenario<LoyaltyCardEditActivity> scenario = ActivityScenario.launch(LoyaltyCardEditActivity.class)) {
             onView(withText(R.string.options)).perform(click());
@@ -39,36 +47,63 @@ public class LoyaltyCardEditActivityDefaultCurrencyTest {
     }
 
     @Test
-    public void manualCurrencyOverridePersists() {
-        // 1. Setup: Sätt standardvaluta till "$"
+    public void manualCurrencyPersistsAfterSave() {
+        // Setup preferred currency is USD ($) (before app starts)
         Context context = ApplicationProvider.getApplicationContext();
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         String key = context.getString(R.string.settings_key_default_currency);
-        prefs.edit().putString(key, "$").commit();
+        prefs.edit().putString(key, "USD").commit();
 
-        // 2. Öppna vyn för att skapa nytt kort
-        try (ActivityScenario<LoyaltyCardEditActivity> scenario = ActivityScenario.launch(LoyaltyCardEditActivity.class)) {
+        try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
+        
+            // 1 click + to add new card (fabAdd)
+            onView(withId(R.id.fabAdd)).perform(click());
+
+            // 2 handle camera stuff
+            // try-catch if it does not come up
+            try {
+                onView(withText("Got It")).perform(click());
+            } catch (Exception e) { /* already clicked or never showed */ }
+
+            // 3 click more options
+            onView(withText("More options")).perform(click());
+
+            // 4 click on text
+            onView(withText("Add a card with no barcode")).perform(click());
+
+            // 5 click on edit and type
+            onView(withClassName(endsWith("EditText"))).perform(typeText("123"), closeSoftKeyboard());
+            onView(withText("OK")).perform(click());
+
+            // 6 fill in name
+            onView(withId(R.id.storeNameEdit)).perform(typeText("mr no hands"), closeSoftKeyboard());
             
-            // Fyll i obligatoriskt namn och ID på första fliken
-            onView(withId(R.id.storeNameEdit)).perform(typeText("Testkort"), closeSoftKeyboard());
-            onView(withId(R.id.cardIdView)).perform(typeText("12345"), closeSoftKeyboard());
-
-            // 3. Gå till Options och ändra valuta manuellt till "£"
+            // 7 click options
             onView(withText(R.string.options)).perform(click());
-            // Vi använder replaceText för att simulera att användaren väljer i listan
+
+            // 8 check preferred curr is correct
+            onView(withId(R.id.balanceCurrencyField))
+                .check(matches(withText("$")));
+
+            // 9 change curr
             onView(withId(R.id.balanceCurrencyField)).perform(replaceText("£"), closeSoftKeyboard());
 
-            // 4. Klicka på spara-knappen (FAB)
+            // 10 save (fabSave)
             onView(withId(R.id.fabSave)).perform(click());
+
+            // 11 find card in list and open
+            onView(withText("mr no hands")).perform(click());
+
+            // 12 click edit
+            onView(withId(R.id.fabEdit)).perform(click());
+
+            // 13 click options
+            onView(withText(R.string.options)).perform(click());
+
+            // 14 verify curr is £ and not default $
+            onView(withId(R.id.balanceCurrencyField))
+                .check(matches(withText("£")));
         }
-
-        // 5. Nu simulerar vi att vi öppnar kortet igen
-        // I ett riktigt scenario skulle vi hämta ID från databasen, 
-        // men vi kan testa att öppna EditActivity igen för att se att den inte tappat minnet.
-        // För enkelhetens skull i detta steg kollar vi att det sparades i databasen:
-        
-        // (Här kan vi lägga till logik för att öppna det nyss skapade kortet)
     }
-
 
 }
