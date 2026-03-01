@@ -48,7 +48,6 @@ public class LoyaltyCardEditActivityDefaultCurrencyTest {
 
     @Test
     public void manualCurrencyPersistsAfterSave() {
-        // Setup preferred currency is USD ($) (before app starts)
         Context context = ApplicationProvider.getApplicationContext();
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         String key = context.getString(R.string.settings_key_default_currency);
@@ -56,51 +55,26 @@ public class LoyaltyCardEditActivityDefaultCurrencyTest {
 
         try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
         
-            // 1 click + to add new card (fabAdd)
             onView(withId(R.id.fabAdd)).perform(click());
 
-            // 2 handle camera stuff
-            // try-catch if it does not come up
+            // handle if camera option shows up
             try {
                 onView(withText("Got It")).perform(click());
             } catch (Exception e) { /* already clicked or never showed */ }
 
-            // 3 click more options
             onView(withText("More options")).perform(click());
-
-            // 4 click on text
             onView(withText("Add a card with no barcode")).perform(click());
-
-            // 5 click on edit and type
             onView(withClassName(endsWith("EditText"))).perform(typeText("123"), closeSoftKeyboard());
             onView(withText("OK")).perform(click());
-
-            // 6 fill in name
-            onView(withId(R.id.storeNameEdit)).perform(typeText("mr no hands"), closeSoftKeyboard());
-            
-            // 7 click options
+            onView(withId(R.id.storeNameEdit)).perform(typeText("card name 123"), closeSoftKeyboard());
             onView(withText(R.string.options)).perform(click());
-
-            // 8 check preferred curr is correct
             onView(withId(R.id.balanceCurrencyField))
                 .check(matches(withText("$")));
-
-            // 9 change curr
             onView(withId(R.id.balanceCurrencyField)).perform(replaceText("£"), closeSoftKeyboard());
-
-            // 10 save (fabSave)
             onView(withId(R.id.fabSave)).perform(click());
-
-            // 11 find card in list and open
             onView(withText("mr no hands")).perform(click());
-
-            // 12 click edit
             onView(withId(R.id.fabEdit)).perform(click());
-
-            // 13 click options
             onView(withText(R.string.options)).perform(click());
-
-            // 14 verify curr is £ and not default $
             onView(withId(R.id.balanceCurrencyField))
                 .check(matches(withText("£")));
         }
