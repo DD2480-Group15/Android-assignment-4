@@ -108,7 +108,6 @@ public class Settings {
 
     @Nullable
     public Currency getPreferredCurrency() {
-        //default default is POINT
         String points = getResString(R.string.points);
         String stored = getString(R.string.settings_key_default_currency, points);
 
@@ -116,13 +115,12 @@ public class Settings {
             return null; 
         }
 
-        // Find currency by symbol
-        for (Currency currency : Currency.getAvailableCurrencies()) {
-            if (currency.getSymbol().equals(stored)) {
-                return currency;
-            }
+        // Guard against invalid or legacy stored currencies
+        try {
+            return Currency.getInstance(stored);
+        } catch (IllegalArgumentException ignored) {
+            return null;
         }
-        return null;
     }
 
     public boolean useVolumeKeysForNavigation() {

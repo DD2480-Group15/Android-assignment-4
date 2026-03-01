@@ -10,7 +10,6 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
 import androidx.preference.ListPreference
 import androidx.preference.Preference
-import androidx.preference.DropDownPreference
 import androidx.preference.PreferenceFragmentCompat
 import protect.card_locker.BuildConfig
 import protect.card_locker.CatimaAppCompatActivity
@@ -18,6 +17,7 @@ import protect.card_locker.MainActivity
 import protect.card_locker.R
 import protect.card_locker.Utils
 import protect.card_locker.databinding.SettingsActivityBinding
+import java.util.Currency
 
 class SettingsActivity : CatimaAppCompatActivity() {
 
@@ -85,32 +85,6 @@ class SettingsActivity : CatimaAppCompatActivity() {
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             // Load the preferences from an XML resource
             addPreferencesFromResource(R.xml.preferences)
-
-            //currency preference
-            val currencyPref = findPreference<DropDownPreference>(getString(R.string.settings_key_default_currency))
-
-            currencyPref?.let { pref ->
-                // Show symbols only
-                val symbols = java.util.Currency.getAvailableCurrencies()
-                    .map { it.symbol }  
-                    .distinct()
-                    .sorted()
-
-                //add POINTS and none options
-                val mutableSymbols = symbols.toMutableList()
-                mutableSymbols.add(0, getString(R.string.points))
-
-                pref.entries = mutableSymbols.toTypedArray() //displayed
-                pref.entryValues = mutableSymbols.toTypedArray() // saved under the key
-
-                // show current selection as summary
-                pref.summary = pref.value ?: ""
-                // update summary immediately when user picks one
-                pref.onPreferenceChangeListener = Preference.OnPreferenceChangeListener { p, newValue ->
-                    p.summary = newValue as String
-                    true // returning true = allow saving
-                }
-            }
 
             // Show pretty names and summaries
             val themePreference = findPreference<ListPreference>(getString(R.string.settings_key_theme))
@@ -187,6 +161,38 @@ class SettingsActivity : CatimaAppCompatActivity() {
             // Hide crash reporter settings on builds it's not enabled on
             val crashReporterPreference = findPreference<Preference>("acra.enable")
             crashReporterPreference!!.isVisible = BuildConfig.useAcraCrashReporter
+
+            // Set entries for preferred currency
+            val currencyPreference = findPreference<ListPreference>(getString(R.string.settings_key_default_currency))!!
+            currencyPreference.let { pref ->
+                val currencies = Currency.getAvailableCurrencies()
+                    .associateBy { it.symbol } // Deduplicates currencies by symbol to match behaviour in LoyaltyCardEditActivity
+                    .values
+                    .sortedWith { c1, c2 ->
+                        val s1 = c1.symbol
+                        val s2 = c2.symbol
+
+                        val s1Ascii = s1.matches("^[^a-zA-Z]*$".toRegex())
+                        val s2Ascii = s2.matches("^[^a-zA-Z]*$".toRegex())
+
+                        when {
+                            !s1Ascii && s2Ascii -> 1
+                            s1Ascii && !s2Ascii -> -1
+                            else -> s1.compareTo(s2)
+                        }
+                    }
+
+                val symbols = currencies.map { it.symbol }.toMutableList()
+                val codes = currencies.map { it.currencyCode }.toMutableList()
+
+                // Add points as an option
+                val points = getString(R.string.points)
+                symbols.add(0, points)
+                codes.add(0, points)
+
+                pref.entries = symbols.toTypedArray()
+                pref.entryValues = codes.toTypedArray()
+            }
         }
 
         private fun refreshActivity(reloadMain: Boolean) {
