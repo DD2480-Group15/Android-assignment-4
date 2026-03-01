@@ -1403,17 +1403,13 @@ public class LoyaltyCardViewActivityTest {
         assertEquals(-416706, ((ColorDrawable) activity.findViewById(R.id.thumbnail).getBackground()).getColor());
     }
 
+
     @Test
-    public void startWithoutDefaultCurrencyThenSetToEuro(){
+    public void verifyDefaultCurrencyPreferenceInitiallySetToPoints(){
         final Context context = ApplicationProvider.getApplicationContext();
 
-        Currency expectedCurrency = Currency.getInstance("EUR");
-        String expectedSymbol = expectedCurrency.getSymbol();
-
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        prefs.edit()
-                .putString(context.getString(R.string.settings_key_default_currency), expectedSymbol)
-                .commit();
+        prefs.edit().clear().commit();
 
         ActivityController activityController = Robolectric.buildActivity(LoyaltyCardEditActivity.class).create();
 
@@ -1425,12 +1421,7 @@ public class LoyaltyCardViewActivityTest {
 
         Activity activity = (Activity) activityController.get();
 
-        checkAllFields(activity, ViewMode.ADD_CARD, "", "", context.getString(R.string.anyDate), context.getString(R.string.never), "0.00", expectedSymbol, "", context.getString(R.string.sameAsCardId), context.getString(R.string.noBarcode), "ISO-8859-1", null, null);
-
-        //reset prefs
-        prefs.edit()
-                .remove(context.getString(R.string.settings_key_default_currency))
-                .commit();
-
+        checkAllFields(activity, ViewMode.ADD_CARD, "", "", context.getString(R.string.anyDate), context.getString(R.string.never), "0", context.getString(R.string.points), "", context.getString(R.string.sameAsCardId), context.getString(R.string.noBarcode), "ISO-8859-1", null, null);
     }
+
 }
